@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View DICOM Image</title>
+    <style>
+        .container { max-width: 1000px; margin: 0 auto; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        #image { max-width: 100%; height: auto; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/3.1.0/openseadragon.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/3.1.0/openseadragon.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Alegria PACS Viewer</h1>
+        <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+
+        <div class="controls">
+            <button onclick="zoomIn()">Zoom In</button>
+            <button onclick="zoomOut()">Zoom Out</button>
+            <button onclick="rotateImage()">Rotate</button>
+            <button onclick="pan('left')">Pan Left</button>
+            <button onclick="pan('right')">Pan Right</button>
+            <button onclick="pan('up')">Pan Up</button>
+            <button onclick="pan('down')">Pan Down</button>
+        </div>
+
+        <div class="controls">
+            <label for="window_width">Window Width:</label>
+            <input type="number" id="window_width" value="400" onchange="adjustWindow()">
+            <label for="window_level">Window Level:</label>
+            <input type="number" id="window_level" value="40" onchange="adjustWindow()">
+        </div>
+
+        <div class="controls">
+            <button onclick="startAnnotation()">Start Annotation</button>
+            <button onclick="measureDistance()">Measure Distance</button>
+            <button onclick="exportImage('png')">Export PNG</button>
+            <button onclick="exportImage('jpeg')">Export JPEG</button>
+        </div>
+
+        <div class="controls">
+            <button onclick="loadImageSeries()">Load Image Series</button>
+            <button onclick="viewStack()">View Stack</button>
+        </div>
+    </div>
+
+    <script>
+        var viewer = OpenSeadragon({
+            id: "openseadragon1",
+            prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/3.1.0/images/",
+            tileSources: {
+                type: 'image',
+                url: "{{ image_url }}"
+            }
+        });
+    
+        function zoomIn() {
+            viewer.viewport.zoomBy(1.2);
+        }
+    
+        function zoomOut() {
+            viewer.viewport.zoomBy(0.8);
+        }
+    
+        function rotateImage() {
+            viewer.viewport.setRotation(viewer.viewport.getRotation() + 90);
+        }
+    
+        function pan(direction) {
+            var delta = 0.1;
+            switch(direction) {
+                case 'left':
+                    viewer.viewport.panBy(new OpenSeadragon.Point(-delta, 0));
+                    break;
+                case 'right':
+                    viewer.viewport.panBy(new OpenSeadragon.Point(delta, 0));
+                    break;
+                case 'up':
+                    viewer.viewport.panBy(new OpenSeadragon.Point(0, -delta));
+                    break;
+                case 'down':
+                    viewer.viewport.panBy(new OpenSeadragon.Point(0, delta));
+                    break;
+            }
+        }
+    
+        function adjustWindow() {
+    const width = parseFloat(document.getElementById('window_width').value);
+    const level = parseFloat(document.getElementById('window_level').value);
+    console.log('Adjusting window to width: ' + width + ' level: ' + level);
+
+    // Calculate window center and range
+    const windowCenter = level;
+    const windowWidth = width;
+
+    // Update viewport options
+    viewer.viewport.setMinPixelRatio(windowWidth / 256);
+    viewer.viewport.resetContentSize();
+
+    // Update image processing settings
+    viewer.viewport.updateSettings({
+        windowCenter: windowCenter,
+        windowWidth: windowWidth
+    });
+}
+
+
+    
+function startAnnotation(metadata) {
+    console.log('Starting annotation with metadata:', metadata);
+
+    const overlayElement = document.createElement('div');
+    overlayElement.style.position = 'absolute';
+    overlayElement.style.border = '2px solid red';
+    overlayElement.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+    overlayElement.style.padding = '5px';
+    overlayElement.style.pointerEvents = 'auto'; // Ensure events are captured
+
+    const annotationContent = document.createElement('div');
+    annotationContent.textContent = 'Annotation';
+    annotationContent.style.color = 'red';
+    overlayElement.appendChild(annotationContent);
+
+    const viewerContainer = document.getElementById('openseadragon1');
+    viewerContainer.appendChild(overlayElement);
+
+    // Define overlay location based on viewer's coordinates
+    const viewportPoint = viewer.viewport.pixelFromPoint(new OpenSeadragon.Point(0.5, 0.5), true);
+    const overlayLocation = viewer.viewport.viewerElementToViewportCoordinates(viewportPoint);
+
+    overlayElement.style.left = overlayLocation.x + 'px';
+    overlayElement.style.top = overlayLocation.y + 'px';
+
+    // Example: Attach metadata to the overlay element as data attributes
+    overlayElement.dataset.metadata = JSON.stringify(metadata);
+
+    // Example: Access metadata within the overlay
+    overlayElement.addEventListener('click', function(event) {
+        const clickedOverlay = event.target;
+        const metadataString = clickedOverlay.dataset.metadata;
+        const annotationMetadata = JSON.parse(metadataString);
+        console.log('Overlay clicked with metadata:', annotationMetadata);
+        // Implement your logic when the overlay is clicked, using metadata
+    });
+}
+
+
+    
+    function measureDistance() {
+    console.log('Measuring distance');
+    
+    // Example: Add a handler to measure distance between two points
+    viewer.addHandler('canvas-click', function(event) {
+        if (event.quick) {
+            const viewportPoint = viewer.viewport.pointFromPixel(event.position);
+            const imagePoint = viewer.viewport.viewportToImageCoordinates(viewportPoint);
+            console.log('Clicked at image coordinates:', imagePoint);
+        }
+    });
+}
+
+     
+    
+        function exportImage(format) {
+            const image_id = "{{ image_id }}";
+            const url = `/dicom/export_image/${image_id}/${format}`;
+            window.open(url, '_blank');
+        }
+    
+        function loadImageSeries() {
+            const study_id = "{{ dicom_image.study.id }}";
+            const url = `/dicom/load_image_series/${study_id}`;
+            $.get(url, function(data) {
+                console.log('Loaded image series:', data.series);
+            });
+        }
+    
+        function viewStack() {
+            const study_id = "{{ dicom_image.study.id }}";
+            const url = `/dicom/image_stacking/${study_id}`;
+            $.get(url, function(data) {
+                console.log('Loaded image stack:', data.stack);
+            });
+        }
+    </script>
+    </body>
+</html>
+

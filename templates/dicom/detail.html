@@ -1,0 +1,240 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block search %}
+    <!-- Custom search form if needed -->
+{% endblock search %}
+
+{% block subheader %}
+{% endblock subheader %}
+
+{% block content %}
+<style>
+    /* Custom styles for the sidebar and content */
+    .sidebar {
+        background-color: #301934;
+        color: #fff;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px; /* Adjust sidebar width as needed */
+        overflow-y: auto; /* Enable scrolling if content exceeds sidebar height */
+        z-index: 1000; /* Ensure sidebar is above other content */
+        padding-top: 20px;
+        transition: all 0.5s ease; /* Smooth transition for better UX */
+    }
+
+    .sidebar h3 {
+        color: #fff;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 52px;
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        transition: background-color 0.3s ease, border-left 0.3s ease;
+    }
+
+    .sidebar ul li a:hover {
+        background-color: #3c153b; /* Darken background on hover */
+        border-left: 4px solid #fff; /* Highlight left border on hover */
+        padding-left: 16px;
+    }
+
+    .content-wrapper {
+        margin-left: 250px; /* Adjust based on sidebar width */
+        padding-top: 80px; /* Adjust based on your header height */
+    }
+
+    .content-area {
+        padding: 20px;
+    }
+
+    .nav-tabs {
+        border-bottom: none;
+    }
+
+    .nav-tabs .nav-link {
+        color: #301934; /* Match the sidebar color */
+        font-weight: bold;
+        border: none;
+        border-radius: 0;
+        background: none;
+        margin-right: 20px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #301934; /* Active tab background color */
+        color: #fff;
+    }
+
+    .tab-content {
+        padding-top: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar" id="sidebar">
+            <h3>Alegria Pacs</h3>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'dicom:dicom_list' %}">Home</a></li>
+                <li><a href="#">Accounts</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-9 content-wrapper">
+            <!-- Tab content -->
+            <ul class="nav nav-tabs justify-content-center" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="study-details-tab" data-bs-toggle="tab" href="#study-details" role="tab" aria-controls="study-details" aria-selected="true">
+                        <i class="fas fa-info-circle"></i> 📎 Study Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="study-instances-tab" data-bs-toggle="tab" href="#study-instances" role="tab" aria-controls="study-instances" aria-selected="false">
+                        <i class="fas fa-images"></i> 📎 Study Instances
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="patient-reports-tab" data-bs-toggle="tab" href="#patient-reports" role="tab" aria-controls="patient-reports" aria-selected="false">
+                        <i class="fas fa-file-alt"></i> 📎 Patient Reports
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content mt-4">
+                <!-- Study Details Tab -->
+                <div class="tab-pane fade show active" id="study-details" role="tabpanel" aria-labelledby="study-details-tab">
+                    <div class="card p-5 mt-3">
+                        <h2 class="section-title">Study Details</h2>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ study_form.as_p }}
+                            </div>
+                            <button type="submit" class="btn btn-custom">Save Study Details</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Study Instances Tab -->
+                <div class="tab-pane fade" id="study-instances" role="tabpanel" aria-labelledby="study-instances-tab">
+                    <div class="card p-5 mt-3">
+                        <h2 class="section-title">Study Instances</h2>
+                        <div class="mt-3">
+                            <a href="{% url 'dicom:upload' %}" class="btn-sophisticated">
+                                <button type="button" class="btn btn-primary">Upload New Instance</button>
+                            </a>
+                    
+                        </div>
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>File</th>
+                                    <th>Modality</th>
+                                    <th>Body Part</th>
+                                    <th>Procedure</th>
+                                    <th>Study Description</th>
+                                    <th>Additional Documents</th>
+                                    <th>Actions</th> <!-- New column for actions -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for image in study.images.all %}
+                                <tr>
+                                    <td><button onclick="openPopup('{{ image.id }}')" class="btn btn-info btn-sm">View Image</button></td>
+                                    <td>{{ image.modality }}</td>
+                                    <td>{{ image.body_part }}</td>
+                                    <td>{{ image.study.procedure }}</td>
+                                    <td>{{ image.study.study_description }}</td>
+                                    <td>
+                                        <form method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="form-group2">
+                                                {{ document_form.as_p }}
+                                            </div>
+                                            <button type="submit" class="btn btn-custom mt-2" name="upload_document">Upload Document</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <!-- Delete form -->
+                                        <form method="POST" action="{% url 'dicom:delete_dicom_instance' image.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Patient Reports Tab -->
+                <div class="tab-pane fade" id="patient-reports" role="tabpanel" aria-labelledby="patient-reports-tab">
+                    <div class="card p-5 mt-3">
+                        <h2 class="section-title">Patient Reports</h2>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ report_form.as_p }}
+                            </div>
+                            <button type="submit" class="btn btn-custom">Save Report</button>
+                        </form>
+                        <a href="{% url 'dicom:download_report' study.pk %}" class="btn btn-info mt-3">Download Report</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+
+
+<script>
+    function openPopup(image_id) {
+        const url = `/dicom/view_image/${image_id}/`;
+        const popup = window.open(url, 'Image Viewer', 'width=1000,height=800');
+        if (window.focus) {
+            popup.focus();
+        }
+        return false;
+    }
+    
+
+    // Toggle sidebar function
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    }
+
+    document.getElementById('uploadInput').addEventListener('change', function() {
+        document.getElementById('uploadForm').submit();
+    });
+    // Event listener for sidebar toggle button
+    document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+</script>
+{% endblock content %}
+{%block footer %}
+
+{% endblock footer %}

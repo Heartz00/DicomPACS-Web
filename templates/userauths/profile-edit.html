@@ -1,0 +1,88 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+    <main class="main pages">
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
+                    <span></span> Pages <span></span> My Account
+                </div>
+            </div>
+        </div>
+        <div class="page-content pt-150 pb-150">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-10 m-auto">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="dashboard-menu">
+                                    <ul class="nav flex-column" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false"><i class="fi-rs-user mr-10"></i>Profile</a>
+                                        </li>
+                                        
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="page-login.html"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="tab-content account dashboard-content pl-50">
+                                    <div class="tab-pane fade active show" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                        <div class="card">
+                                            <div class="card-header border-bottom">
+                                                <h3 class="mb-0">Update Profile</h3>
+                                            </div>
+                                            {% if form.errors %}
+                                            <div class="alert-danger alert">
+                                                <strong>{{ form.errors }}</strong>
+                                            </div>
+                                            {% endif %}
+                                            <div class="card-body mb-2" style="display: flex; align-items: center; gap: 10px;">
+                                                <div>
+                                                    {% if profile.image %}
+                                                    <span><img src="{{ profile.image.url }}" style="width: 150px; object-fit: cover; border-radius:50%; height:150px;" alt=""></span>
+                                                    {% else %}
+                                                    <span><img src="https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg" style="width: 150px; object-fit: cover; border-radius:50%; height:150px;" alt=""></span>
+
+                                                    {% endif %}
+                                                </div>
+                                                    <div>
+                                                        <form action="" method="POST" enctype="multipart/form-data"> 
+                                                            {% csrf_token %}
+                                                            <div class="mb-3">
+                                                                {{form.full_name}}
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                {{form.bio}}
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                {{form.phone}}
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                {{form.image}}
+                                                            </div>
+                                                            <button class="bxtn btn-succees" type="submit">Save Changes</button>
+                                                        </form>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+{% endblock content %}

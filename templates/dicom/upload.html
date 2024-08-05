@@ -1,0 +1,115 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block search %}
+<!-- Custom search form if needed -->
+{% endblock search %}
+
+{% block subheader %}
+{% endblock subheader %}
+
+{% block content %}
+<style>
+    /* Custom styles for the sidebar and content */
+    .sidebar {
+        background-color: #301934;
+        color: #fff;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px; /* Adjust sidebar width as needed */
+        overflow-y: auto; /* Enable scrolling if content exceeds sidebar height */
+        z-index: 1000; /* Ensure sidebar is above other content */
+        padding-top: 20px;
+        transition: all 0.5s ease; /* Smooth transition for better UX */
+    }
+
+    .sidebar h3 {
+        color: #fff;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 52px;
+    }
+
+    .sidebar ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar ul li a {
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        padding: 10px;
+        transition: background-color 0.3s ease, border-left 0.3s ease;
+    }
+
+    .sidebar ul li a:hover {
+        background-color: #3c153b; /* Darken background on hover */
+        border-left: 4px solid #fff; /* Highlight left border on hover */
+        padding-left: 16px;
+    }
+
+    .content-wrapper {
+        margin-left: 250px; /* Adjust based on sidebar width */
+        padding-top: 80px; /* Adjust based on your header height */
+    }
+
+    .content-area {
+        padding: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar" id="sidebar">
+            <h3>Alegria PACS</h3>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'dicom:dicom_list' %}">Home</a></li>
+                <li><a href="#">Accounts</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-9 content-wrapper">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card mt-5">
+                            <div class="card-body">
+                                <h2 class="card-title text-center mb-4">Upload DICOM File</h2>
+                                <form method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <button type="submit" class="btn btn-primary btn-block mt-4">Upload</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle sidebar function
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    }
+
+    // Event listener for sidebar toggle button
+    document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+</script>
+{% endblock content %}
+{% block footer %}
+{% endblock footer %}

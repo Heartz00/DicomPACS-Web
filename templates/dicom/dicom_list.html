@@ -1,0 +1,154 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block search %}
+<!-- Custom search form if needed -->
+{% endblock search %}
+
+{% block subheader %}
+<div class="main-categori-wrap d-none d-lg-block">
+    <a href="{% url 'dicom:upload' %}" class="btn-sophisticated">
+        <span class="et">Add New Study</span>
+    </a>
+</div>
+
+{% endblock subheader %}
+
+{% block content %}
+<style>
+   
+
+    /* Pagination styles */
+    .pagination {
+        display: flex;
+        justify-content: center;
+    }
+
+    .page-item .page-link {
+        color: #301934; /* Match the sidebar color */
+        border: 1px solid #301934;
+    }
+
+    .page-item.active .page-link {
+        background-color: #301934;
+        border-color: #301934;
+        color: #fff;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <h3>Alegria PACS</h3>
+            <ul class="list-unstyled">
+                <li><a href="{% url 'dicom:dicom_list' %}">Home</a></li>
+                <li><a href="#">Accounts</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-9 content-wrapper">
+            <!-- Search form -->
+            <form method="GET" action="{% url 'dicom:dicom_list' %}" class="search-form mb-3">
+                <div class="search-container">
+                    <input type="text" name="q" class="search-style-2" placeholder="Search by patient name" value="{{ request.GET.q }}">
+                    <button type="submit" class="btn btn-primary search-btn">Search</button>
+                </div>
+            </form>
+
+            <h2>Patient Imaging Records</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Time of Study</th>
+                        <th>Time of Upload</th>
+                        <th>Patient Name</th>
+                        <!--<th>Mod</th>
+                        <th>Body Part</th>-->
+                        <th>Assign</th>
+                        <th>Institution</th>
+                        <th>Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for study in studies %}
+                    <tr>
+                        <td>{{ study.study_date }}</td>
+                        <td>{{ study.upload_time }}</td>
+                        <td><a href="{% url 'dicom:detail' study.id %}">{{ study.patient_name }}</a></td>
+                        <!--<td>{{ study.modality }}</td>
+                        <td>{{ study.body_part }}</td>-->
+                        <td>
+                            <form action="{% url 'dicom:assign_study' study.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                {{ assign_form.doctor }}
+                                <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+                            </form>
+                        </td>
+                        <td>
+                            <span data-toggle="tooltip" title="{{ study.institution.name }}">
+                                <i class="fas fa-hospital"></i>
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'dicom:download_report' study.id %}" class="btn btn-info btn-sm" title="Download Report">
+                               Download Report
+                            </a>
+                            <a href="{% url 'dicom:detail' study.id %}" class="btn btn-success btn-sm" title="Write Report">
+                                <!--<img src="{% static 'assets/theme/icons/write.png' %}" class="icon" alt="Write Report">-->
+                                Write Report
+                            </a>
+                            <a href="{% url 'dicom:detail' study.id %}" class="btn btn-warning btn-sm" title="Upload Document">
+                                    Upload Document        </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination Controls -->
+            <nav>
+                <ul class="pagination">
+                    {% if studies.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ studies.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in studies.paginator.page_range %}
+                    {% if studies.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                    {% elif num > studies.number|add:'-5' and num < studies.number|add:'5' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if studies.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ studies.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
+{% endblock content %}
+{%block footer %}
+
+{% endblock footer %}

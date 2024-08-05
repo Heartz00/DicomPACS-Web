@@ -1,0 +1,22 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block content %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Successful</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Add any other stylesheets or meta tags here -->
+</head>
+<body>
+    <div class="container">
+        <h2>Registration Successful</h2>
+        <p>Hey, your account was created successfully and is pending approval.</p>
+        <p>Please wait for the admin to approve your account. You will receive an email notification once your account is approved.</p>
+        <button href="{% url 'userauths:sign-in' %}">Go to Sign In</button>
+    </div>
+</body>
+</html>
+{% endblock content %}

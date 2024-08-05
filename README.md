@@ -19,7 +19,7 @@ Features
 Technical Details
 
 - Framework: Django Python framework
-- Database: PostgreSQL
+- Database: Sqlite
 - DICOM Library: Pydicom
 - Frontend: HTML, CSS, JavaScript, Bootstrap
 

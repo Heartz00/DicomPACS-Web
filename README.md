@@ -25,7 +25,7 @@ Technical Details
 
 Installation
 
-1. Clone the repository: `git clone https://github.com/Heartz00/DicomPACS-Web.git'
+1. Clone the repository: `git clone https://github.com/Heartz00/DicomPACS-Web.git'🍡 
 2. Navigate to the directory where the clone repo is and Install dependencies: pip install -r requirements.txt
 3. Run migrations in the directory of the main folder: python manage.py migrate
 4. Start the server: python manage.py runserver

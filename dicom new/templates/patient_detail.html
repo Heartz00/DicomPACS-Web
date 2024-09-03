@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Detail</title>
+</head>
+<body>
+    <h1>Patient Detail: {{ patient.name }}</h1>
+    <p>Patient ID: {{ patient.patient_id }}</p>
+    <p>Birth Date: {{ patient.birth_date }}</p>
+    <p>Study Description: {{ patient.study_description }}</p>
+    <p>Study Date: {{ patient.study_date }}</p>
+    <p>Modalities: {{ patient.modalities_in_study }}</p>
+    <p>Accession Number: {{ patient.accession_number }}</p>
+    <p>Number of Series: {{ patient.number_of_series }}</p>
+    <a href="{{ OHIF_VIEWER_URL }}/viewer/">{{ patient.name }} Study</a>
+</body>
+</html>
+
